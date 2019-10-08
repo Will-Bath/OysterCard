@@ -11,16 +11,14 @@ describe OysterCard do
     it { is_expected.to respond_to(:top_up).with(1).argument } # checking if top_up method has 1 variable within it
 
     it 'can add funds to balance' do
-      # oystercard = OysterCard.new
-      # oystercard.top_up(20)
-      # expect(oystercard.balance).to eq(20)
 
       subject.top_up(20)
       expect(subject.balance).to eq(20)
     end
 
     it 'prevents topping up if balance is at max balance' do
-      subject.top_up(90)
+      max_balance = OysterCard::MAX_BALANCE
+      subject.top_up(max_balance)
       expect { subject.top_up(1) }.to raise_error 'Balance will exceed limit'
     end
 
@@ -54,7 +52,8 @@ describe OysterCard do
     end
 
     it 'Will not allow touch in if balance is less than 1' do
-      expect{ subject.touch_in }.to raise_error "Balance is below 1£ you can not travel"
+      min_balance = OysterCard::MIN_BALANCE
+      expect{ subject.touch_in }.to raise_error "Balance is below £#{min_balance}; you can not travel"
     end
   end
 
@@ -64,6 +63,13 @@ describe OysterCard do
     it 'Changes status in_journey to false when touching out' do
       subject.touch_out
       expect(subject.in_journey?).to eq(false)
+    end
+
+    it 'deducts the correct amount from the card' do
+      min_charge = OysterCard::MIN_CHARGE
+      subject.top_up(min_charge + 1)
+      subject.touch_in
+      expect { subject.touch_out }.to change { subject.balance }.by(-min_charge)
     end
   end
 end

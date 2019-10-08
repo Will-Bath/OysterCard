@@ -4,6 +4,8 @@ class OysterCard
   attr_accessor :in_journey
   attr_reader :balance
   MAX_BALANCE = 90
+  MIN_BALANCE = 1
+  MIN_CHARGE = 1
 
   def initialize(balance = 0, in_journey = false)
     @balance = balance
@@ -12,7 +14,7 @@ class OysterCard
 
   def top_up(amount)
     raise 'Balance will exceed limit' if @balance >= MAX_BALANCE
-    if @balance + amount > 90
+    if @balance + amount > MAX_BALANCE
       raise 'Balance will exceed limit'
     else
       @balance += amount
@@ -24,12 +26,13 @@ class OysterCard
   end
 
   def touch_in
-    raise 'Balance is below 1£ you can not travel' if @balance < 1
+    raise "Balance is below £#{MIN_BALANCE}; you can not travel" if @balance < MIN_BALANCE
 
     @in_journey = true
   end
 
   def touch_out
+    deduct(MIN_CHARGE)
     @in_journey = false
   end
 

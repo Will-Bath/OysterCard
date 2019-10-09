@@ -1,15 +1,17 @@
 # frozen_string_literal: true
 
 class OysterCard
-  attr_accessor :in_journey
-  attr_reader :balance
+  attr_accessor :journeys
+  attr_reader :balance, :entry_station, :exit_station
   MAX_BALANCE = 90
   MIN_BALANCE = 1
   MIN_CHARGE = 1
 
-  def initialize(balance = 0, in_journey = false)
+  def initialize(balance = 0)
     @balance = balance
-    @in_journey = in_journey
+    @entry_station
+    @exit_station
+    @journeys = []
   end
 
   def top_up(amount)
@@ -25,18 +27,36 @@ class OysterCard
     @balance -= amount
   end
 
-  def touch_in
+  def touch_in(entry_station)
     raise "Balance is below £#{MIN_BALANCE}; you can not travel" if @balance < MIN_BALANCE
 
-    @in_journey = true
+    @entry_station = entry_station
   end
 
-  def touch_out
+  def touch_out(exit_station)
     deduct(MIN_CHARGE)
-    @in_journey = false
+
+    @exit_station = exit_station
+
+    @journeys << {entry: @entry_station, exit: @exit_station}
   end
 
   def in_journey?
-    @in_journey
+    if entry_station == nil
+      return false
+    else
+      return true
+    end
   end
+end
+
+class Station
+
+  attr_reader :name, :zone
+
+  def initialize(name, zone)
+    @name = name
+    @zone = zone
+  end
+
 end

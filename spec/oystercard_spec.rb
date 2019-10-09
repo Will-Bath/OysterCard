@@ -7,6 +7,10 @@ describe OysterCard do
     expect(subject.balance).to eq(0)
   end
 
+  it 'starts with no journeys on the card' do
+    expect(subject.journeys).to eq([])
+  end
+
   describe '#top_up' do
     it { is_expected.to respond_to(:top_up).with(1).argument } # checking if top_up method has 1 variable within it
 
@@ -47,13 +51,20 @@ describe OysterCard do
 
     it 'Changes status in_journey to true when touching in' do
       subject.top_up(10)
-      subject.touch_in
+      subject.touch_in('station')
       expect(subject.in_journey?).to eq(true)
     end
 
     it 'Will not allow touch in if balance is less than 1' do
       min_balance = OysterCard::MIN_BALANCE
-      expect{ subject.touch_in }.to raise_error "Balance is below £#{min_balance}; you can not travel"
+      expect{ subject.touch_in('station') }.to raise_error "Balance is below £#{min_balance}; you can not travel"
+    end
+
+    it 'Remembers the entry station' do
+      station = double(:station)
+      subject.top_up(30)
+      subject.touch_in(station)
+      expect(subject.entry_station).to eq(station)
     end
   end
 
@@ -61,15 +72,45 @@ describe OysterCard do
     it { is_expected.to respond_to(:touch_out) }
 
     it 'Changes status in_journey to false when touching out' do
-      subject.touch_out
+      subject.touch_out('station')
       expect(subject.in_journey?).to eq(false)
     end
 
     it 'deducts the correct amount from the card' do
       min_charge = OysterCard::MIN_CHARGE
       subject.top_up(min_charge + 1)
-      subject.touch_in
-      expect { subject.touch_out }.to change { subject.balance }.by(-min_charge)
+      subject.touch_in('station')
+      expect { subject.touch_out('station') }.to change { subject.balance }.by(-min_charge)
+    end
+
+    it 'Remembers the exit station' do
+      station = double(:station)
+      subject.top_up(30)
+      subject.touch_in('station')
+      expect { subject.touch_out(station) }.to change{ subject.exit_station }.to station
+    end
+
+    it 'creates the hash with the entry and exit station' do
+      station1 = double(:station)
+      station2 = double(:station)
+      subject.top_up(30)
+      subject.touch_in(station1)
+      subject.touch_out(station2)
+      expect(subject.journeys[0]).to eq({entry: station1, exit: station2})
     end
   end
+end
+
+describe Station do
+
+  subject {described_class.new("Old Street", 1)}
+
+  it 'has a name variable' do
+    expect(subject.name).to eq("Old Street")
+  end
+
+  it 'has a zone variable' do
+    expect(subject.zone).to eq(1)
+  end
+
 end

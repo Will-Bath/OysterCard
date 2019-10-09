@@ -5,7 +5,6 @@ class OysterCard
   attr_reader :balance, :entry_station, :exit_station
   MAX_BALANCE = 90
   MIN_BALANCE = 1
-  MIN_CHARGE = 1
 
   def initialize(balance = 0)
     @balance = balance
@@ -34,11 +33,9 @@ class OysterCard
   end
 
   def touch_out(exit_station)
-    deduct(MIN_CHARGE)
-
     @exit_station = exit_station
 
-    @journeys << {entry: @entry_station, exit: @exit_station}
+    @journeys << Journey.new(@entry_station, @exit_station)
   end
 
   def in_journey?
@@ -57,6 +54,28 @@ class Station
   def initialize(name, zone)
     @name = name
     @zone = zone
+  end
+
+end
+
+class Journey
+
+  attr_accessor :entry_station, :exit_station
+  MIN_CHARGE = 1
+  MAX_CHARGE = 6
+
+  def initialize(entry_station, exit_station)
+    @entry_station = entry_station
+    @exit_station = exit_station
+    @min_fare = MIN_CHARGE
+    @max_fare = MAX_CHARGE
+  end
+
+  def fare
+    if @entry_station == nil || @exit_station == nil
+      return @max_fare
+    end
+    return @min_fare
   end
 
 end

@@ -4,9 +4,9 @@ class Journey
   MIN_CHARGE = 1
   MAX_CHARGE = 6
 
-  def initialize(entry_station, exit_station)
-    @entry_station = entry_station
-    @exit_station = exit_station
+  def initialize
+    @entry_station
+    @exit_station
     @min_fare = MIN_CHARGE
     @max_fare = MAX_CHARGE
   end
@@ -16,6 +16,14 @@ class Journey
       return @max_fare
     end
     return @min_fare
+  end
+
+  def change_entry(entry_station)
+    @entry_station = entry_station
+  end
+
+  def change_exit(exit_station)
+    @exit_station = exit_station
   end
 
 end

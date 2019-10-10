@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OysterCard
-  attr_accessor :journeys
+  attr_accessor :journey_log
   attr_reader :balance, :entry_station, :exit_station
   MAX_BALANCE = 90
   MIN_BALANCE = 1
@@ -10,7 +10,7 @@ class OysterCard
     @balance = balance
     @entry_station
     @exit_station
-    @journeys = []
+    @journey_log = Journey_Log.new
   end
 
   def top_up(amount)
@@ -30,19 +30,19 @@ class OysterCard
     raise "Balance is below £#{MIN_BALANCE}; you can not travel" if @balance < MIN_BALANCE
 
     @entry_station = entry_station
+    @journey_log.start(@entry_station)
+    if journey_log.fare > 0
+      deduct(@journey_log.fare)
+    end
   end
 
   def touch_out(exit_station)
     @exit_station = exit_station
-
-    @journeys << Journey.new(@entry_station, @exit_station)
+    @journey_log.finish(@exit_station)
+    deduct(@journey_log.fare)
   end
 
   def in_journey?
-    if entry_station == nil
-      return false
-    else
-      return true
-    end
+    !!entry_station
   end
 end

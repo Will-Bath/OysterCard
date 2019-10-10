@@ -11,7 +11,7 @@ describe OysterCard do
   end
 
   it 'starts with no journeys on the card' do
-    expect(subject.journeys).to eq([])
+    expect(subject.journey_log.journeys).to eq([])
   end
 
   describe '#top_up' do
@@ -32,16 +32,6 @@ describe OysterCard do
     it 'prevents topping up if the end balance will be above max' do
       subject.top_up(70)
       expect { subject.top_up(25) }.to raise_error 'Balance will exceed limit'
-    end
-  end
-  describe '#deduct' do
-    xit { is_expected.to respond_to(:deduct).with(1).argument }
-
-    xit 'deducts an amount from the balance' do
-      subject.top_up(20)
-      subject.deduct(5)
-
-      expect(subject.balance).to eq(15)
     end
   end
 
@@ -79,11 +69,10 @@ describe OysterCard do
       expect(subject.in_journey?).to eq(false)
     end
 
-    xit 'deducts the correct amount from the card' do
-      min_charge = OysterCard::MIN_CHARGE
-      subject.top_up(min_charge + 1)
+    it 'deducts the correct amount from the card' do
+      subject.top_up(30)
       subject.touch_in('station')
-      expect { subject.touch_out('station') }.to change { subject.balance }.by(-min_charge)
+      expect { subject.touch_in('station') }.to change { subject.balance }.by(-6)
     end
 
     it 'Remembers the exit station' do
@@ -91,15 +80,6 @@ describe OysterCard do
       subject.top_up(30)
       subject.touch_in('station')
       expect { subject.touch_out(station) }.to change{ subject.exit_station }.to station
-    end
-
-    xit 'creates the hash with the entry and exit station' do
-      station1 = double(:station)
-      station2 = double(:station)
-      subject.top_up(30)
-      subject.touch_in(station1)
-      subject.touch_out(station2)
-      expect(subject.journeys[0]).to eq({entry: station1, exit: station2})
     end
   end
 end

@@ -31,15 +31,15 @@ class OysterCard
 
     @entry_station = entry_station
     @journey_log.start(@entry_station)
-    if journey_log.fare > 0
-      deduct(@journey_log.fare)
+    if journey_log.charge > 0
+      deduct(@journey_log.charge)
     end
   end
 
   def touch_out(exit_station)
     @exit_station = exit_station
     @journey_log.finish(@exit_station)
-    deduct(@journey_log.fare)
+    deduct(@journey_log.charge)
   end
 
   def in_journey?

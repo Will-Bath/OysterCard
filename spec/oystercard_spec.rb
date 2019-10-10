@@ -59,6 +59,19 @@ describe OysterCard do
       subject.touch_in(station)
       expect(subject.entry_station).to eq(station)
     end
+
+    it 'deducts the correct amount from the card' do
+      subject.top_up(30)
+      subject.touch_in('station')
+      expect { subject.touch_in('station') }.to change { subject.balance }.by(-6)
+    end
+
+    it 'deducts the correct amount when touching out, then touch in' do
+      subject.top_up(30)
+      subject.touch_out('station')
+      subject.touch_in('station')
+      expect(subject.balance).to eq(24)
+    end
   end
 
   describe 'touch_out' do
@@ -69,17 +82,24 @@ describe OysterCard do
       expect(subject.in_journey?).to eq(false)
     end
 
-    it 'deducts the correct amount from the card' do
-      subject.top_up(30)
-      subject.touch_in('station')
-      expect { subject.touch_in('station') }.to change { subject.balance }.by(-6)
-    end
-
     it 'Remembers the exit station' do
       station = double(:station)
       subject.top_up(30)
       subject.touch_in('station')
       expect { subject.touch_out(station) }.to change{ subject.exit_station }.to station
+    end
+
+    it 'Correctly deducts fare when touching in and touching out' do
+      subject.top_up(30)
+      subject.touch_in('station')
+      expect { subject.touch_out('station') }.to change { subject.balance }.by(-1)
+    end
+
+    it 'Correctly deducts fare when touching out, then touching out again' do
+      subject.top_up(30)
+      subject.touch_out('station')
+      subject.touch_out('station')
+      expect(subject.balance).to eq(18)
     end
   end
 end

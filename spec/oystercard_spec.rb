@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 require 'oystercard'
+require 'station'
+require 'journey'
+require 'journey_log'
 
 describe OysterCard do
   it 'can check balance on card is 0' do
@@ -98,43 +101,5 @@ describe OysterCard do
       subject.touch_out(station2)
       expect(subject.journeys[0]).to eq({entry: station1, exit: station2})
     end
-  end
-end
-
-describe Station do
-
-  subject {described_class.new("Old Street", 1)}
-
-  it 'has a name variable' do
-    expect(subject.name).to eq("Old Street")
-  end
-
-  it 'has a zone variable' do
-    expect(subject.zone).to eq(1)
-  end
-
-end
-
-describe Journey do
-
-  let(:station1) { Station.new("Old Street", 1) }
-  let(:station2) { Station.new("New Street", 2) }
-
-  context 'journey initialization' do
-    subject {described_class.new(station1, station2)}
-
-    it 'stores entry station' do
-      expect(subject.entry_station).to eq(station1)
-    end
-
-    it 'stores exit station' do
-      expect(subject.exit_station).to eq(station2)
-    end
-  end
-
-  subject {described_class.new(station1, nil)}
-
-  it 'charges max fare if touch in is empty' do
-    expect(subject.fare).to eq(6)
   end
 end

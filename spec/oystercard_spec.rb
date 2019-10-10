@@ -60,22 +60,28 @@ describe OysterCard do
       expect(subject.entry_station).to eq(station)
     end
 
-    it 'deducts the correct amount from the card' do
-      subject.top_up(30)
-      subject.touch_in('station')
-      expect { subject.touch_in('station') }.to change { subject.balance }.by(-6)
-    end
+    context 'works out correct fares' do
+      let(:station1) { Station.new("Old Street", 1) }
+      let(:station2) { Station.new("New Street", 2) }
 
-    it 'deducts the correct amount when touching out, then touch in' do
-      subject.top_up(30)
-      subject.touch_out('station')
-      subject.touch_in('station')
-      expect(subject.balance).to eq(24)
+      it 'deducts the correct amount from the card' do
+        subject.top_up(30)
+        subject.touch_in(station1)
+        expect { subject.touch_in(station2) }.to change { subject.balance }.by(-6)
+      end
+
+      it 'deducts the correct amount when touching out, then touch in' do
+        subject.top_up(30)
+        subject.touch_out(station1)
+        subject.touch_in(station2)
+        expect(subject.balance).to eq(24)
+      end
     end
   end
 
   describe 'touch_out' do
     it { is_expected.to respond_to(:touch_out) }
+    let(:station) { Station.new("Old Street", 1) }
 
     it 'Changes status in_journey to false when touching out' do
       subject.touch_out('station')
@@ -83,23 +89,33 @@ describe OysterCard do
     end
 
     it 'Remembers the exit station' do
-      station = double(:station)
       subject.top_up(30)
-      subject.touch_in('station')
+      subject.touch_in(station)
       expect { subject.touch_out(station) }.to change{ subject.exit_station }.to station
     end
 
-    it 'Correctly deducts fare when touching in and touching out' do
-      subject.top_up(30)
-      subject.touch_in('station')
-      expect { subject.touch_out('station') }.to change { subject.balance }.by(-1)
-    end
+    context 'works out correct fares' do
+      let(:station1) { Station.new("Old Street", 1) }
+      let(:station2) { Station.new("New Street", 2) }
 
-    it 'Correctly deducts fare when touching out, then touching out again' do
-      subject.top_up(30)
-      subject.touch_out('station')
-      subject.touch_out('station')
-      expect(subject.balance).to eq(18)
+      it 'Correctly deducts fare when touching in and touching out at same zone' do
+        subject.top_up(30)
+        subject.touch_in(station1)
+        expect { subject.touch_out(station1) }.to change { subject.balance }.by(-1)
+      end
+
+      it 'Correctly deducts fare when touching in and touching out at different zones' do
+        subject.top_up(30)
+        subject.touch_in(station1)
+        expect { subject.touch_out(station2) }.to change { subject.balance }.by(-2)
+      end
+
+      it 'Correctly deducts fare when touching out, then touching out again' do
+        subject.top_up(30)
+        subject.touch_out(station1)
+        subject.touch_out(station1)
+        expect(subject.balance).to eq(18)
+      end
     end
   end
 end

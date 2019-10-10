@@ -14,8 +14,13 @@ class Journey
   def fare
     if @entry_station == nil || @exit_station == nil
       return @max_fare
+    elsif @entry_station.zone != @exit_station.zone
+      zone_diff = (@entry_station.zone - @exit_station.zone).to_i
+      return (1 + zone_diff.abs)
+    else
+      return @min_fare
     end
-    return @min_fare
+
   end
 
   def change_entry(entry_station)
